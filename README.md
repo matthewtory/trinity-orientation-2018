@@ -1,8 +1,9 @@
-# trinity_orientation_2018
+# Trinity Orientation 2018
 
-A new Flutter project.
+An app created for Trinity College at University of Toronto. The app is acts as a companion during orientation week for all first year students.
 
-## Getting Started
-
-For help getting started with Flutter, view our online
-[documentation](https://flutter.io/).
+#### Features
+* Detailed schedule of events
+* Interactive map
+* 'Trinspace' - a fun photo sharing solution
+* Miscellaneous information and a Q&A system
