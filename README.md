@@ -1,6 +1,6 @@
 # Trinity Orientation 2018
 
-An app created for Trinity College at University of Toronto. The app is acts as a companion during orientation week for all first year students.
+An app created for Trinity College at University of Toronto. The app is acts as a companion for all first year students during orientation week.
 
 Available on [Google Play](https://play.google.com/store/apps/details?id=com.tory.trinityOrientation) and the [App Store](https://itunes.apple.com/us/app/trinity-orientation-2t2000s/id1431022073)
 
