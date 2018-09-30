@@ -4,6 +4,8 @@ An app created for Trinity College at University of Toronto. The app is acts as 
 
 Available on [Google Play](https://play.google.com/store/apps/details?id=com.tory.trinityOrientation) and the [App Store](https://itunes.apple.com/us/app/trinity-orientation-2t2000s/id1431022073)
 
+Designed and developed by Matthew Tory
+
 #### Features
 * Detailed schedule of events
 
