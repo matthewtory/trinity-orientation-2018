@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'backdrop.dart';
 import 'bloc/schedule_bloc.dart';
-import 'models/ScheduleDay.dart';
 import 'bloc/schedule_provider.dart';
 import 'bloc/scroll_bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -92,31 +91,34 @@ class MyFrontLayerState extends State<MyFrontLayer> {
     ScheduleBloc schedule = ScheduleProvider.of(context);
 
     return PhysicalShape(
-        child: Container(
-          color: Colors.white,
-          child: StreamBuilder(
-            stream: schedule.latestItem,
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                List<DocumentSnapshot> events = snapshot.data as List<DocumentSnapshot>;
-                events.sort((snapshot1, snapshot2) {
-                  if (snapshot1 == null || snapshot2 == null) {
-                    return 0;
-                  }
+        child: ClipRRect(
+          borderRadius: BorderRadius.only(topLeft: Radius.circular(20.0), topRight: Radius.circular(20.0)),
+          child: Container(
+            color: Colors.white,
+            child: StreamBuilder(
+              stream: schedule.latestItem,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  List<DocumentSnapshot> events = snapshot.data as List<DocumentSnapshot>;
+                  events.sort((snapshot1, snapshot2) {
+                    if (snapshot1 == null || snapshot2 == null) {
+                      return 0;
+                    }
 
-                  DateTime firstDate = snapshot1['date_start'];
-                  DateTime secondDate = snapshot2['date_start'];
+                    DateTime firstDate = (snapshot1['date_start'] as Timestamp).toDate();
+                    DateTime secondDate = (snapshot2['date_start'] as Timestamp).toDate();
 
-                  return firstDate.compareTo(secondDate);
-                });
+                    return firstDate.compareTo(secondDate);
+                  });
 
-                return Center(
-                  child: EventList(events: events, scrollPhysics: widget.scrollPhysics),
-                );
-              } else {
-                return Center(child: CircularProgressIndicator());
-              }
-            },
+                  return Center(
+                    child: EventList(events: events, scrollPhysics: widget.scrollPhysics),
+                  );
+                } else {
+                  return Center(child: CircularProgressIndicator());
+                }
+              },
+            ),
           ),
         ),
         elevation: 12.0,
@@ -171,7 +173,7 @@ class MyBackLayerState extends State<MyBackLayer> with SingleTickerProviderState
     eventsOnDays = {};
 
     for (DocumentSnapshot snapshot in widget.events) {
-      DateTime date = snapshot['date_start'] as DateTime;
+      DateTime date = (snapshot['date_start'] as Timestamp).toDate();
       DateTime day = DateTime(date.year, date.month, date.day);
 
       if (eventsOnDays[day] == null) {
@@ -414,7 +416,7 @@ class DayCard extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: EventRow(
-                  snapshot['date_start'],
+                  (snapshot['date_start'] as Timestamp).toDate(),
                   snapshot['title'],
                   EventType.fromTitle(snapshot['type']),
                 ),
@@ -575,12 +577,12 @@ class EventListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final EventType type = EventType.fromTitle(event['type']);
     bool mini = event['priority'] < 2;
-    DateTime date = event['date_start'] as DateTime;
+    DateTime date = (event['date_start'] as Timestamp).toDate();
 
     bool connectsToTop = previousEventInList != null;
 
     if (connectsToTop) {
-      DateTime previousTime = previousEventInList['date_start'] as DateTime;
+      DateTime previousTime = (previousEventInList['date_start'] as Timestamp).toDate();
 
       if (previousTime == date) {
         connectsToTop = false;
@@ -590,7 +592,7 @@ class EventListTile extends StatelessWidget {
     bool connectsToBottom = nextEventInList != null;
 
     if (connectsToBottom) {
-      DateTime nextTime = nextEventInList['date_start'] as DateTime;
+      DateTime nextTime = (nextEventInList['date_start'] as Timestamp).toDate();
 
       if (nextTime == date) {
         connectsToBottom = false;

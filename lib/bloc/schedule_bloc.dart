@@ -1,5 +1,4 @@
 import 'dart:async';
-import '../models/ScheduleDay.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 

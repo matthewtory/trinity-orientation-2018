@@ -178,19 +178,23 @@ class _ImageProviderResolver {
 
   CachedNetworkImage get widget => state.widget;
 
+  ImageStreamListener _imageStreamListener;
   ImageStream _imageStream;
   ImageInfo _imageInfo;
 
   void resolve(CachedNetworkImageProvider provider) {
+    if (_imageStreamListener == null) {
+      _imageStreamListener = ImageStreamListener(_handleImageChanged);
+    }
     final ImageStream oldImageStream = _imageStream;
     _imageStream = provider.resolve(createLocalImageConfiguration(state.context,
         size: widget.width != null && widget.height != null
-            ? new Size(widget.width, widget.height)
+            ? Size(widget.width, widget.height)
             : null));
 
     if (_imageStream.key != oldImageStream?.key) {
-      oldImageStream?.removeListener(_handleImageChanged);
-      _imageStream.addListener(_handleImageChanged);
+      oldImageStream?.removeListener(_imageStreamListener);
+      _imageStream.addListener(_imageStreamListener);
     }
   }
 
@@ -200,7 +204,9 @@ class _ImageProviderResolver {
   }
 
   void stopListening() {
-    _imageStream?.removeListener(_handleImageChanged);
+    if (_imageStreamListener != null) {
+      _imageStream?.removeListener(_imageStreamListener);
+    }
   }
 }
 
@@ -220,10 +226,11 @@ class _CachedNetworkImageState extends State<CachedNetworkImage>
   @override
   void initState() {
     _hasError = false;
-    _imageProvider = new CachedNetworkImageProvider(widget.imageUrl, widget.bucket,
+    _imageProvider = new CachedNetworkImageProvider(
+        widget.imageUrl, widget.bucket,
         headers: widget.httpHeaders, errorListener: _imageLoadingFailed);
     _imageResolver =
-    new _ImageProviderResolver(state: this, listener: _updatePhase);
+        new _ImageProviderResolver(state: this, listener: _updatePhase);
 
     _controller = new AnimationController(
       value: 1.0,
@@ -260,7 +267,8 @@ class _CachedNetworkImageState extends State<CachedNetworkImage>
     super.didUpdateWidget(oldWidget);
     if (widget.imageUrl != oldWidget.imageUrl ||
         widget.placeholder != widget.placeholder) {
-      _imageProvider = new CachedNetworkImageProvider(widget.imageUrl, widget.bucket,
+      _imageProvider = new CachedNetworkImageProvider(
+          widget.imageUrl, widget.bucket,
           errorListener: _imageLoadingFailed);
 
       _resolveImage();
@@ -314,7 +322,7 @@ class _CachedNetworkImageState extends State<CachedNetworkImage>
           }
           break;
         case ImagePhase.completed:
-        // Nothing to do.
+          // Nothing to do.
           break;
       }
     });
@@ -455,9 +463,11 @@ class CachedNetworkImageProvider
     return new MultiFrameImageStreamCompleter(
         codec: _loadAsync(key),
         scale: key.scale,
-        informationCollector: (StringBuffer information) {
-          information.writeln('Image provider: $this');
-          information.write('Image key: $key');
+        informationCollector: () {
+          return [
+            DiagnosticsNode.message('Image provider: $this'),
+            DiagnosticsNode.message('Image key: $key'),
+          ];
         });
   }
 

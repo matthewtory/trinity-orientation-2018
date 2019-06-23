@@ -120,21 +120,24 @@ class _InfoPageState extends State<InfoPage> {
                                             print('tap');
                                             launch(snapshot.data.documents[i]['url']);
                                           },
-                                          child: Container(
-                                            width: 56.0,
-                                            height: 56.0,
-                                            child: new FirebaseStorageImage(
-                                              reference: FirebaseStorage.instance
-                                                  .ref()
-                                                  .child('resources')
-                                                  .child(snapshot.data.documents[i]['image']),
-                                              errorWidget: new Icon(
-                                                Icons.link,
-                                                color: Colors.blue,
-                                              ),
-                                              fallbackWidget: new Icon(
-                                                Icons.link,
-                                                color: Colors.blue,
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(28),
+                                            child: Container(
+                                              width: 56.0,
+                                              height: 56.0,
+                                              child: new FirebaseStorageImage(
+                                                reference: FirebaseStorage.instance
+                                                    .ref()
+                                                    .child('resources')
+                                                    .child(snapshot.data.documents[i]['image']),
+                                                errorWidget: new Icon(
+                                                  Icons.link,
+                                                  color: Colors.blue,
+                                                ),
+                                                fallbackWidget: new Icon(
+                                                  Icons.link,
+                                                  color: Colors.blue,
+                                                ),
                                               ),
                                             ),
                                           ),
@@ -347,7 +350,7 @@ class QuestionListTile extends StatelessWidget {
           return new Text(text);
         },
       ),
-      trailing: new Text(computeHowLongAgoTextShort(document['timestamp'])),
+      trailing: new Text(computeHowLongAgoTextShort((document['timestamp'] as Timestamp).toDate())),
     );
   }
 }
@@ -1000,7 +1003,7 @@ class _QuestionAnswersPageState extends State<QuestionAnswersPage> with TickerPr
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 4.0),
             child: new Text(
-              computeHowLongAgoText(snapshot.data['timestamp']),
+              computeHowLongAgoText((snapshot.data['timestamp'] as Timestamp).toDate()),
               style: new TextStyle(color: Colors.white),
             ),
           )
@@ -1044,160 +1047,162 @@ class _QuestionAnswersPageState extends State<QuestionAnswersPage> with TickerPr
                   ),
                 ),
               ),
-              Column(
-                children: <Widget>[
-                  new AppBar(
-                    elevation: 0.0,
-                    backgroundColor: Colors.transparent,
-                    actions: <Widget>[
-                      new FutureBuilder<FirebaseUser>(
-                          future: FirebaseAuth.instance.currentUser(),
-                          builder: (context, user) {
-                            if (user != null &&
-                                user.hasData &&
-                                (user.data.uid == snapshot.data['uid'] || !user.data.isAnonymous)) {
-                              return new IconButton(
-                                icon: new Icon(Icons.delete),
-                                tooltip: 'Delete Question',
-                                onPressed: () async {
-                                  var result = await showDialog(
-                                    context: context,
-                                    builder: (context) => new AlertDialog(
-                                          title: new Text('Delete Question?'),
-                                          actions: <Widget>[
-                                            new FlatButton(
+              SafeArea(
+                child: Column(
+                  children: <Widget>[
+                    new AppBar(
+                      elevation: 0.0,
+                      backgroundColor: Colors.transparent,
+                      actions: <Widget>[
+                        new FutureBuilder<FirebaseUser>(
+                            future: FirebaseAuth.instance.currentUser(),
+                            builder: (context, user) {
+                              if (user != null &&
+                                  user.hasData &&
+                                  (user.data.uid == snapshot.data['uid'] || !user.data.isAnonymous)) {
+                                return new IconButton(
+                                  icon: new Icon(Icons.delete),
+                                  tooltip: 'Delete Question',
+                                  onPressed: () async {
+                                    var result = await showDialog(
+                                      context: context,
+                                      builder: (context) => new AlertDialog(
+                                            title: new Text('Delete Question?'),
+                                            actions: <Widget>[
+                                              new FlatButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop(false);
+                                                  },
+                                                  child: new Text('Cancel')),
+                                              new FlatButton(
                                                 onPressed: () {
-                                                  Navigator.of(context).pop(false);
+                                                  Navigator.of(context).pop(true);
                                                 },
-                                                child: new Text('Cancel')),
-                                            new FlatButton(
-                                              onPressed: () {
-                                                Navigator.of(context).pop(true);
-                                              },
-                                              child: new Text(
-                                                'Delete',
-                                                style: new TextStyle(color: Colors.red),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                  );
-
-                                  if ((result != null && result)) {
-                                    Firestore.instance.runTransaction(
-                                      (transaction) async {
-                                        await transaction.delete(widget.documentReference);
-
-                                        Navigator.pop(context);
-                                      },
-                                    );
-                                  }
-                                },
-                              );
-                            }
-
-                            return Container();
-                          }),
-                    ],
-                  ),
-                  _buildQuestionHeader(context, snapshot.data),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: new Divider(
-                      height: 1.0,
-                      color: Colors.white,
-                    ),
-                  ),
-                  Expanded(
-                    child: FutureBuilder<FirebaseUser>(
-                      future: FirebaseAuth.instance.currentUser(),
-                      builder: (context, user) {
-                        if (user.hasData) {
-                          this.uid = user.data.uid;
-                        }
-
-                        return new StreamBuilder<QuerySnapshot>(
-                          stream: Firestore.instance
-                              .collection('questions/${snapshot.data.documentID}/answers')
-                              .orderBy('timestamp', descending: true)
-                              .snapshots(),
-                          builder: (context, answersSnapshot) {
-                            if (!answersSnapshot.hasData)
-                              return Center(
-                                child: new CircularProgressIndicator(
-                                  valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),
-                                ),
-                              );
-
-                            List<DocumentSnapshot> answers = answersSnapshot.data.documents;
-
-                            return new ListView.builder(
-                              itemCount: answers.length,
-                              reverse: true,
-                              itemBuilder: (context, index) {
-                                final DocumentSnapshot document = answers[index];
-
-                                return new Row(
-                                  mainAxisAlignment: user.data.uid == document['uid']
-                                      ? MainAxisAlignment.end
-                                      : MainAxisAlignment.start,
-                                  children: <Widget>[
-                                    user.data.uid != document['uid']
-                                        ? new StreamBuilder<QuerySnapshot>(
-                                            stream: Firestore.instance
-                                                .collection('users/')
-                                                .where('uid', isEqualTo: document['uid'])
-                                                .snapshots(),
-                                            builder: (context, snapshot) {
-                                              Color backgroundColor = Theme.of(context).primaryColor;
-                                              Widget child = new Container();
-
-                                              if (snapshot.hasData && snapshot.data.documents.length >= 1) {
-                                                DocumentSnapshot userDoc = snapshot.data.documents.first;
-                                                String name = userDoc['name'];
-                                                List<String> nameComponents = name.split('\ ').where((string) => string.length > 0).toList();
-                                                backgroundColor = colorForAlphabetLetter(name.substring(0, 1));
-                                                print(nameComponents);
-                                                child = new Text(
-                                                  '${name.substring(0, 1)}${nameComponents.length > 1 ? (nameComponents[1].length > 0) : ''}',
-                                                  style:
-                                                      new TextStyle(fontSize: nameComponents.length > 1 ? 12.0 : 14.0),
-                                                );
-                                              }
-
-                                              return Padding(
-                                                padding: const EdgeInsets.only(left: 4.0),
-                                                child: new CircleAvatar(
-                                                  backgroundColor: backgroundColor,
-                                                  maxRadius: 14.0,
-                                                  child: child,
+                                                child: new Text(
+                                                  'Delete',
+                                                  style: new TextStyle(color: Colors.red),
                                                 ),
-                                              );
-                                            })
-                                        : new Container(),
-                                    Padding(
-                                      padding: const EdgeInsets.all(4.0),
-                                      child: Container(
-                                        constraints: new BoxConstraints(maxWidth: 200.0),
-                                        child: new Card(
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: new Text(document['answer']),
+                                              ),
+                                            ],
+                                          ),
+                                    );
+
+                                    if ((result != null && result)) {
+                                      Firestore.instance.runTransaction(
+                                        (transaction) async {
+                                          await transaction.delete(widget.documentReference);
+
+                                          Navigator.pop(context);
+                                        },
+                                      );
+                                    }
+                                  },
+                                );
+                              }
+
+                              return Container();
+                            }),
+                      ],
+                    ),
+                    _buildQuestionHeader(context, snapshot.data),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: new Divider(
+                        height: 1.0,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Expanded(
+                      child: FutureBuilder<FirebaseUser>(
+                        future: FirebaseAuth.instance.currentUser(),
+                        builder: (context, user) {
+                          if (user.hasData) {
+                            this.uid = user.data.uid;
+                          }
+
+                          return new StreamBuilder<QuerySnapshot>(
+                            stream: Firestore.instance
+                                .collection('questions/${snapshot.data.documentID}/answers')
+                                .orderBy('timestamp', descending: true)
+                                .snapshots(),
+                            builder: (context, answersSnapshot) {
+                              if (!answersSnapshot.hasData)
+                                return Center(
+                                  child: new CircularProgressIndicator(
+                                    valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),
+                                  ),
+                                );
+
+                              List<DocumentSnapshot> answers = answersSnapshot.data.documents;
+
+                              return new ListView.builder(
+                                itemCount: answers.length,
+                                reverse: true,
+                                itemBuilder: (context, index) {
+                                  final DocumentSnapshot document = answers[index];
+
+                                  return new Row(
+                                    mainAxisAlignment: user.data.uid == document['uid']
+                                        ? MainAxisAlignment.end
+                                        : MainAxisAlignment.start,
+                                    children: <Widget>[
+                                      user.data.uid != document['uid']
+                                          ? new StreamBuilder<QuerySnapshot>(
+                                              stream: Firestore.instance
+                                                  .collection('users/')
+                                                  .where('uid', isEqualTo: document['uid'])
+                                                  .snapshots(),
+                                              builder: (context, snapshot) {
+                                                Color backgroundColor = Theme.of(context).primaryColor;
+                                                Widget child = new Container();
+
+                                                if (snapshot.hasData && snapshot.data.documents.length >= 1) {
+                                                  DocumentSnapshot userDoc = snapshot.data.documents.first;
+                                                  String name = userDoc['name'];
+                                                  List<String> nameComponents = name.split('\ ').where((string) => string.length > 0).toList();
+                                                  backgroundColor = colorForAlphabetLetter(name.substring(0, 1));
+                                                  print(nameComponents);
+                                                  child = new Text(
+                                                    '${name.substring(0, 1)}${nameComponents.length > 1 ? (nameComponents[1].length > 0) : ''}',
+                                                    style:
+                                                        new TextStyle(fontSize: nameComponents.length > 1 ? 12.0 : 14.0),
+                                                  );
+                                                }
+
+                                                return Padding(
+                                                  padding: const EdgeInsets.only(left: 4.0),
+                                                  child: new CircleAvatar(
+                                                    backgroundColor: backgroundColor,
+                                                    maxRadius: 14.0,
+                                                    child: child,
+                                                  ),
+                                                );
+                                              })
+                                          : new Container(),
+                                      Padding(
+                                        padding: const EdgeInsets.all(4.0),
+                                        child: Container(
+                                          constraints: new BoxConstraints(maxWidth: 200.0),
+                                          child: new Card(
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: new Text(document['answer']),
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          },
-                        );
-                      },
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                          );
+                        },
+                      ),
                     ),
-                  ),
-                  _buildTextComposer(),
-                ],
+                    _buildTextComposer(),
+                  ],
+                ),
               ),
             ],
           );

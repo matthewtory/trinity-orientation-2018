@@ -72,13 +72,13 @@ class _PhotosPageState extends State<PhotosPage> {
             }
 
             List<DocumentSnapshot> startedEvents = snapshot.data.documents
-                .where((snapshot) => (snapshot['date_start'] as DateTime).isBefore(DateTime.now()))
+                .where((snapshot) => (snapshot['date_start'] as Timestamp).toDate().isBefore(DateTime.now()))
                 .toList();
 
             Map<DateTime, List<DocumentSnapshot>> eventsOnDays = {};
 
             for (DocumentSnapshot snapshot in startedEvents) {
-              DateTime date = snapshot['date_start'] as DateTime;
+              DateTime date = (snapshot['date_start'] as Timestamp).toDate();
               DateTime dateAsDay = DateTime(date.year, date.month, date.day);
 
               if (eventsOnDays[dateAsDay] == null) {
@@ -217,24 +217,27 @@ class _PhotosPageState extends State<PhotosPage> {
                     },
                     child: Card(
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: <Widget>[
-                          CachedNetworkImage(
-                            fadeInDuration: Duration(milliseconds: 200),
-                            fadeOutDuration: Duration(milliseconds: 200),
-                            imageUrl: photo['med'],
-                            bucket: 'gs://trinity-orientation-2018-photos',
-                            fit: BoxFit.cover,
-                            placeholder: CachedNetworkImage(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20.0),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: <Widget>[
+                            CachedNetworkImage(
                               fadeInDuration: Duration(milliseconds: 200),
                               fadeOutDuration: Duration(milliseconds: 200),
-                              imageUrl: photo['low'],
+                              imageUrl: photo['med'],
                               bucket: 'gs://trinity-orientation-2018-photos',
                               fit: BoxFit.cover,
+                              placeholder: CachedNetworkImage(
+                                fadeInDuration: Duration(milliseconds: 200),
+                                fadeOutDuration: Duration(milliseconds: 200),
+                                imageUrl: photo['low'],
+                                bucket: 'gs://trinity-orientation-2018-photos',
+                                fit: BoxFit.cover,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -275,7 +278,7 @@ class _PhotosPageState extends State<PhotosPage> {
   }
 
   Widget buildGridPage(BuildContext context, List<DocumentSnapshot> events) {
-    DateTime day = events.first['date_start'] as DateTime;
+    DateTime day = (events.first['date_start'] as Timestamp).toDate();
     day = DateTime(day.year, day.month, day.day);
 
     return CustomScrollView(
@@ -360,66 +363,69 @@ class _PhotosPageState extends State<PhotosPage> {
             constraints: BoxConstraints.tightFor(height: 200.0),
             child: Card(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
-              child: Stack(
-                fit: StackFit.expand,
-                children: <Widget>[
-                  CachedNetworkImage(
-                    fadeInDuration: Duration(milliseconds: 200),
-                    fadeOutDuration: Duration(milliseconds: 200),
-                    imageUrl: snapshot.data['med'],
-                    bucket: 'gs://trinity-orientation-2018-photos',
-                    fit: BoxFit.cover,
-                    placeholder: CachedNetworkImage(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20.0),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: <Widget>[
+                    CachedNetworkImage(
                       fadeInDuration: Duration(milliseconds: 200),
                       fadeOutDuration: Duration(milliseconds: 200),
-                      imageUrl: snapshot.data['low'],
+                      imageUrl: snapshot.data['med'],
                       bucket: 'gs://trinity-orientation-2018-photos',
                       fit: BoxFit.cover,
-                    ),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                            colors: [Colors.black.withOpacity(0.3), Colors.transparent],
-                            stops: [0.0, 0.3],
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter)),
-                  ),
-                  Positioned(
-                    left: 0.0,
-                    right: 0.0,
-                    top: 0.0,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        event != null ? event['title'] : 'Just Hanging Out',
-                        style: TextStyle(
-                            color: Colors.white.withOpacity(0.6), fontSize: 14.0, fontWeight: FontWeight.w400),
+                      placeholder: CachedNetworkImage(
+                        fadeInDuration: Duration(milliseconds: 200),
+                        fadeOutDuration: Duration(milliseconds: 200),
+                        imageUrl: snapshot.data['low'],
+                        bucket: 'gs://trinity-orientation-2018-photos',
+                        fit: BoxFit.cover,
                       ),
                     ),
-                  ),
-                  Positioned(
-                    left: 0.0,
-                    bottom: 0.0,
-                    child: IgnorePointer(
-                      ignoring: true,
+                    Container(
+                      decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                              colors: [Colors.black.withOpacity(0.3), Colors.transparent],
+                              stops: [0.0, 0.3],
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter)),
+                    ),
+                    Positioned(
+                      left: 0.0,
+                      right: 0.0,
+                      top: 0.0,
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: FloatingActionButton(
-                          heroTag: null,
-                          onPressed: () {},
-                          elevation: 10.0,
-                          mini: true,
-                          backgroundColor: type != null ? type.color : Colors.pink,
-                          child: Icon(
-                            type != null ? type.icon : Icons.nature_people,
-                            size: 20.0,
+                        child: Text(
+                          event != null ? event['title'] : 'Just Hanging Out',
+                          style: TextStyle(
+                              color: Colors.white.withOpacity(0.6), fontSize: 14.0, fontWeight: FontWeight.w400),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      left: 0.0,
+                      bottom: 0.0,
+                      child: IgnorePointer(
+                        ignoring: true,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: FloatingActionButton(
+                            heroTag: null,
+                            onPressed: () {},
+                            elevation: 10.0,
+                            mini: true,
+                            backgroundColor: type != null ? type.color : Colors.pink,
+                            child: Icon(
+                              type != null ? type.icon : Icons.nature_people,
+                              size: 20.0,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );
@@ -905,7 +911,7 @@ class _CameraPreviewState extends State<CameraPreviewController> with SingleTick
     canvas.drawImage(image, Offset.zero, new Paint());
 
     ui.Picture picture = recorder.endRecording();
-    ui.Image pictureToImage = picture.toImage(image.width, image.height);
+    ui.Image pictureToImage = await picture.toImage(image.width, image.height);
     ByteData data = await pictureToImage.toByteData(format: ui.ImageByteFormat.png);
 
     await new File(path).writeAsBytes(Uint8List.view(data.buffer));
@@ -913,7 +919,7 @@ class _CameraPreviewState extends State<CameraPreviewController> with SingleTick
     return path;
   }
 
-  Future<UploadTaskSnapshot> _uploadPicture(BuildContext context, String path) async {
+  Future<StorageUploadTask> _uploadPicture(BuildContext context, String path) async {
     FirebaseUser user = await FirebaseAuth.instance.currentUser();
 
     final File file = File(path);
@@ -924,7 +930,7 @@ class _CameraPreviewState extends State<CameraPreviewController> with SingleTick
         ? null
         : ((selectedEvent is DocumentSnapshot) ? (selectedEvent as DocumentSnapshot).documentID : null);
 
-    return ref.putFile(file, StorageMetadata(contentType: 'image/jpeg', customMetadata: {'event': eventData})).future;
+    return ref.putFile(file, StorageMetadata(contentType: 'image/jpeg', customMetadata: {'event': eventData}));
   }
 
   Widget _cameraLensSelectionWidget() {

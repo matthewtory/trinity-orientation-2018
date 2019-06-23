@@ -241,8 +241,8 @@ class EventPageState extends State<EventPage> with SingleTickerProviderStateMixi
   }
 
   Widget _createEventHeader(BuildContext context, DocumentSnapshot event) {
-    DateTime startDate = widget.event['date_start'];
-    DateTime endDate = widget.event['date_end'];
+    DateTime startDate = (widget.event['date_start'] as Timestamp).toDate();
+    DateTime endDate = (widget.event['date_end'] as Timestamp).toDate();
 
     String startString = '${toTwelveHour(startDate.hour)}:${twoDigits(startDate.minute)} ${amOrPm(startDate.hour)}';
     String endString = '${toTwelveHour(endDate.hour)}:${twoDigits(endDate.minute)} ${amOrPm(endDate.hour)}';
