@@ -6,18 +6,26 @@ Available on [Google Play](https://play.google.com/store/apps/details?id=com.tor
 
 Designed and developed by Matthew Tory
 
-#### Features
-* Detailed schedule of events
+## Features
 
-![Schedule](https://thumbs.gfycat.com/MealyObeseFly-size_restricted.gif)
-![Schedule Detail](https://thumbs.gfycat.com/CompleteSelfreliantHackee-size_restricted.gif)
-* Interactive map
+### Detailed schedule of events
 
-![Map](https://thumbs.gfycat.com/MiniatureScalyChanticleer-size_restricted.gif)
-* 'Trinspace' - a fun photo sharing solution
 
-![TrinSpace](https://thumbs.gfycat.com/DistinctTornAfricanwildcat-size_restricted.gif)
-![Camera](https://thumbs.gfycat.com/LinedAllAfricanrockpython-size_restricted.gif)
-* Miscellaneous information and a Q&A system
+https://github.com/matthewtory/trinity-orientation-2018/assets/9093728/fef3fa36-5e9c-4238-a4a5-1cce1a26de98
 
-![Q&A](https://thumbs.gfycat.com/TimelyMilkyCaiman-size_restricted.gif)
+https://github.com/matthewtory/trinity-orientation-2018/assets/9093728/c13c39b6-318c-42d0-9665-d2e59558d6f0
+
+### Interactive map
+
+https://github.com/matthewtory/trinity-orientation-2018/assets/9093728/b96437f1-b0df-4fa4-a834-3d46b6cd9e4c
+
+
+### 'Trinspace' - a fun photo sharing solution
+
+https://github.com/matthewtory/trinity-orientation-2018/assets/9093728/f7d4868c-5a77-4300-ab71-799f620e15ad
+
+https://github.com/matthewtory/trinity-orientation-2018/assets/9093728/dbb979aa-19c0-47da-b490-91814240e8d9
+
+### Miscellaneous information and a Q&A system
+
+https://github.com/matthewtory/trinity-orientation-2018/assets/9093728/377bc67d-6d79-4386-b5b8-f8005728ac4f
